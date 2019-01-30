@@ -3,8 +3,12 @@ package application;
 import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
@@ -19,7 +23,27 @@ public class Main extends Application {
 	@Override
 	public void start(Stage primaryStage) {
 		try {
-			BorderPane root = new BorderPane();
+			VBox root = new VBox();
+			
+			//////////Buttons///////////
+			
+			HBox buttonsPane = new HBox();
+			
+			Button startButton = new Button("START");
+			Button stopButton = new Button("STOP");
+			Button speedupButton = new Button("+");
+			Button slowdownButton = new Button("-");
+			
+			//Adding buttons to hbox
+			buttonsPane.getChildren().add(startButton);
+			buttonsPane.getChildren().add(stopButton);
+			buttonsPane.getChildren().add(speedupButton);
+			buttonsPane.getChildren().add(slowdownButton);
+			
+			root.getChildren().add(buttonsPane);
+			
+			////////////GRID////////////
+			
 			GridPane grid = new GridPane();
 			
 			//Setting up the grid for cells
@@ -37,6 +61,7 @@ public class Main extends Application {
 			}
 			
 			root.getChildren().add(grid);
+			
 			
 			Controller controller = new Controller();
 			
