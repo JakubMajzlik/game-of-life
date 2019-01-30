@@ -66,6 +66,11 @@ public class Main extends Application {
 			Controller controller = new Controller();
 			
 			controller.setGrid(grid);
+			controller.setStartButton(startButton);
+			controller.setStopButton(stopButton);
+			controller.setSpeedupButton(speedupButton);
+			controller.setSlowdownButton(slowdownButton);
+			
 			controller.handleEvents();
 			
 			Scene scene = new Scene(root,400,400);
