@@ -4,10 +4,8 @@ import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
-import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
@@ -16,9 +14,9 @@ import javafx.stage.Stage;
 
 public class Main extends Application {
 	
-	private final int WIDTH = 20;
-	private final int HEIGHT = 20;
-	private final int CELLSIZE = 40;
+	private int width = 20;
+	private int height = 20;
+	private int cellsize = 40;
 	
 	@Override
 	public void start(Stage primaryStage) {
@@ -46,6 +44,9 @@ public class Main extends Application {
 			
 			GridPane grid = new GridPane();
 			
+			//2D array that holds rectangles
+			Rectangle[][] cellArray = new Rectangle[height][width];
+			
 			//Setting up the grid for cells
 			grid.setGridLinesVisible(true);
 			grid.setPadding(new Insets(5));
@@ -53,25 +54,25 @@ public class Main extends Application {
 			grid.setHgap(1.0);
 			
 			//Adding cells to the grid
-			for(int i = 0; i < WIDTH; i++) {
-				for(int j = 0; j < HEIGHT; j++) {
-					Rectangle cell = new Rectangle(CELLSIZE, CELLSIZE, Color.WHITE);
-					grid.add(cell, i, j);
+			for(int i = 0; i < height; i++) {
+				for(int j = 0; j < width; j++) {
+					Rectangle cell = new Rectangle(cellsize, cellsize, Color.WHITE);
+					grid.add(cell, j, i);
+					cellArray[i][j] = cell;
 				}
 			}
 			
 			root.getChildren().add(grid);
 			
 			
-			Controller controller = new Controller();
+			Controller controller = new Controller(width, height, grid, cellArray);
 			
-			controller.setGrid(grid);
 			controller.setStartButton(startButton);
 			controller.setStopButton(stopButton);
 			controller.setSpeedupButton(speedupButton);
 			controller.setSlowdownButton(slowdownButton);
 			
-			controller.handleEvents();
+			controller.handleInputEvents();
 			
 			Scene scene = new Scene(root,400,400);
 
