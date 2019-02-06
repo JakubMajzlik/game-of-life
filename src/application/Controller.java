@@ -1,5 +1,8 @@
 package application;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javafx.application.Platform;
 import javafx.scene.control.Button;
 import javafx.scene.input.MouseButton;
@@ -24,6 +27,7 @@ public class Controller {
 	private static double speed = 0.1;
 	
 	private Rectangle[][] cellArray;
+	private List<Rectangle> livingCells = new ArrayList<>();
 	
 	public Controller(int width, int height, GridPane grid, Rectangle[][] cellArray) {
 		this.width = width;
@@ -103,54 +107,103 @@ public class Controller {
 	public void setGrid(GridPane grid) {
 		this.grid = grid;
 	}
+
+	/**
+	 * Gets number of neighbor living cells
+	 * @param row
+	 * @param col
+	 * @return
+	 */
+	private int getLivingNeighbors(int row, int col) {
+		int neighbors = 0;
+
+		for(int i = -1; i < 2; i++) {
+			for(int j = -1; j < 2; j++) {
+				if(i == 0 && j == 0) continue;
+				if(row == 0 && i == -1) continue;
+				if(row == height - 1 && i == 1) continue;
+				if(col == 0 && j == -1) continue;
+				if(col == width -1 && j == 1) continue;
+
+				if(cellArray[row + i][col + j].getFill() == Color.BLACK) neighbors++;
+			}
+		}
+		return neighbors;
+	}
+	
+	/**
+	 * Applies rules rules to dead cell
+	 * @param row
+	 * @param col
+	 * @param boolCellArray
+	 */
+	private void applyRuleToDeadCell(int row, int col, boolean[][] boolCellArray) {
+		int neighbors = getLivingNeighbors(row, col);
+
+		if(neighbors == 3) {
+			boolCellArray[row][col] = true;
+		} else {
+			boolCellArray[row][col] = false;
+		}
+	}
+	
+	/**
+	 * Applies rules to the living cell
+	 * @param row
+	 * @param col
+	 * @param boolCellArray
+	 */
+	private void applyRuleToLivingCell(int row, int col, boolean[][] boolCellArray) {
+		int neighbors = getLivingNeighbors(row, col);
+
+		if(neighbors < 2 || neighbors > 3) {
+			boolCellArray[row][col] = false;
+		} else {
+			boolCellArray[row][col] = true;
+		}
+	}
 	
 	/**
 	 * Performs one step of the Game of Life
-	 * TODO: Optimization of algorithm
+	 * TODO: Optimization of applying rules to living cells
 	 */
 	private void doStep() {
 	
+		//Array which contains informations for redrawing
 		boolean[][] boolCellArray = new boolean[height][width];
 		
-		for(int row = 0; row < height; row++) {
-			for(int col = 0; col < width; col++) {
-				int neighbors = 0;
-				
-				//Getting the number of living neighbors
-				for(int i = -1; i < 2; i++) {
-					for(int j = -1; j < 2; j++) {
-						if(i == 0 && j == 0) continue;
-						if(row == 0 && i == -1) continue;
-						if(row == height - 1 && i == 1) continue;
-						if(col == 0 && j == -1) continue;
-						if(col == width -1 && j == 1) continue;
+		for(Rectangle r : livingCells) {
+			int col = GridPane.getColumnIndex(r);
+			int row = GridPane.getRowIndex(r);
+			
+			applyRuleToLivingCell(row, col, boolCellArray);
+			
+			for(int i = -1; i < 2; i++) {
+				for(int j = -1; j < 2; j++) {
+					if(i == 0 && j == 0) continue;
+					if(row == 0 && i == -1) continue;
+					if(row == height - 1 && i == 1) continue;
+					if(col == 0 && j == -1) continue;
+					if(col == width -1 && j == 1) continue;
+					if(cellArray[row + i][col + j].getFill() == Color.BLACK) continue;
 
-						if(cellArray[row + i][col + j].getFill() == Color.BLACK) neighbors++;
-					}
-				}
-				
-				//Applying the rules
-				if(cellArray[row][col].getFill() == Color.BLACK) { // live cell
-					if(neighbors < 2 || neighbors > 3) {
-						boolCellArray[row][col] = false;
-					} else {
-						boolCellArray[row][col] = true;
-					}
-				} else { // dead cell
-					if(neighbors == 3) {
-						boolCellArray[row][col] = true;
-					} else {
-						boolCellArray[row][col] = false;
-					}
+					applyRuleToDeadCell(row + i, col + j, boolCellArray);			
 				}
 			}
+			
 		}
 		
 		//Redrawing the grid with new cells
 		for(int row = 0; row < height; row++) {
 			for(int col = 0; col < width; col++) {
-				if(boolCellArray[row][col] == true) cellArray[row][col].setFill(Color.BLACK);
-				if(boolCellArray[row][col] == false) cellArray[row][col].setFill(Color.WHITE);
+				if(boolCellArray[row][col] == true) {
+					cellArray[row][col].setFill(Color.BLACK);
+					livingCells.add(cellArray[row][col]);
+				}
+				if(boolCellArray[row][col] == false) {
+					cellArray[row][col].setFill(Color.WHITE);
+					livingCells.remove(cellArray[row][col]);
+				}
 			}
 		}
 		
@@ -197,8 +250,10 @@ public class Controller {
 					
 					if(cell.getFill() == Color.WHITE) {
 						cell.setFill(Color.BLACK);
+						livingCells.add(cell);
 					}else {
 						cell.setFill(Color.WHITE);
+						livingCells.remove(cell);
 					}
 				}
 			});
